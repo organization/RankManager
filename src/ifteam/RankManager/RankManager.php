@@ -10,23 +10,17 @@ use pocketmine\Player;
 use pocketmine\utils\TextFormat;
 use pocketmine\command\CommandSender;
 use pocketmine\command\Command;
+use ifteam\RankManager\rank\RankLoader;
+use ifteam\RankManager\listener\EventListener;
+use ifteam\RankManager\listener\other\ListenerLoader;
+use ifteam\RankManager\rank\RankProvider;
 
 class RankManager extends PluginBase implements Listener {
 	/**
 	 *
-	 * @var RankManager default config
+	 * @var Message file
 	 */
-	public $db;
-	/**
-	 *
-	 * @var Users prefix data
-	 */
-	public $users = [ ];
-	/**
-	 *
-	 * @var Users special prefix data
-	 */
-	public $specialPrefix = [ ];
+	private $messages;
 	/**
 	 *
 	 * @var Message file version
@@ -41,31 +35,68 @@ class RankManager extends PluginBase implements Listener {
 	 *
 	 * @var EventListener
 	 */
-	public $eventListener;
+	private $eventListener;
+	/**
+	 *
+	 * @var RankLoader
+	 */
+	private $rankLoader;
+	/**
+	 *
+	 * @var RankProvider
+	 */
+	private $rankProvider;
+	/**
+	 *
+	 * @var ListenerLoader
+	 */
+	private $listenerLoader;
 	public function onEnable() {
+		if (self::$instance == null)
+			self::$instance = $this;
+		
 		if (! file_exists ( $this->getDataFolder () ))
 			@mkdir ( $this->getDataFolder () );
 		
 		$this->initMessage ();
-		// chat example
-		// [ 광산 ] [ 일반 ] hmhmmhm > 채팅메시지 견본
 		
-		// nametag example
-		// [ 24레벨 ] [ 일반 ]
-		// hmhmmhm
-		$this->db = (new Config ( $this->getDataFolder () . "pluginDB.yml", Config::YAML, [ 
-				"defaultPrefix" => $this->get ( "default-player-prefix" ),
-				"defaultPrefixFormat" => TextFormat::GOLD . "[ %prefix% ]",
-				"chatPrefix" => "%special_prefix% %prefixs% %user_name% > %message%",
-				"nameTagPrefix" => "%prefixs% %user_name%",
-				"rankShop" => [ ] 
-		] ))->getAll ();
-		
-		if (self::$instance == null)
-			self::$instance = $this;
+		$this->rankLoader = new RankLoader ( $this );
+		$this->rankProvider = new RankProvider ( $this );
+		$this->listenerLoader = new ListenerLoader ( $this );
+		$this->eventListener = new EventListener ( $this );
 		
 		$this->getServer ()->getPluginManager ()->registerEvents ( $this, $this );
-		$this->eventListener = new EventListener ( $this );
+	}
+	public function onDisable() {
+		$this->save ();
+	}
+	public function save($async = false) {
+		$this->rankLoader->save ( $async );
+		$this->rankProvider->save ( $async );
+	}
+	/**
+	 *
+	 * @return \ifteam\RankManager\rank\RankLoader
+	 */
+	public function getRankLoader() {
+		return $this->rankLoader;
+	}
+	public function getRankProvider() {
+		return $this->rankProvider;
+	}
+	/**
+	 *
+	 * @return \ifteam\RankManager\EventListener
+	 */
+	public function getEventListener() {
+		return $this->eventListener;
+	}
+	/**
+	 *
+	 * @return \ifteam\RankManager\listener\other\ListenerLoader
+	 */
+	public function getListenerLoader() {
+		return $this->listenerLoader;
 	}
 	private function messagesUpdate($targetYmlName) {
 		$targetYml = (new Config ( $this->getDataFolder () . $targetYmlName, Config::YAML ))->getAll ();

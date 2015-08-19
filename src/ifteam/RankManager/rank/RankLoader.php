@@ -9,6 +9,10 @@ use ifteam\RankManager\RankManager;
 
 class RankLoader {
 	private static $instance = null;
+	/**
+	 *
+	 * @var Users prefix data
+	 */
 	private $users;
 	private $plugin;
 	private $server;
@@ -26,7 +30,7 @@ class RankLoader {
 	 * @param array $havePrefixList        	
 	 */
 	public function loadRank($userName = null) {
-		$userName = strtolower ( $player->getName () );
+		$userName = strtolower ( $userName );
 		$alpha = substr ( $userName, 0, 1 );
 		
 		if (isset ( $this->users [$userName] ))
@@ -35,11 +39,11 @@ class RankLoader {
 		return $this->users [$userName] = new RankData ( $userName, $this->plugin->getDataFolder () . "player/" );
 	}
 	public function unloadRank($userName = null) {
-		$userName = strtolower ( $player->getName () );
+		$userName = strtolower ( $userName );
 		if (! isset ( $this->users [$userName] ))
 			return false;
 		if ($this->users [$userName] instanceof RankData)
-			$this->users [$userName]->save ();
+			$this->users [$userName]->save ( true );
 		unset ( $this->users [$userName] );
 		return true;
 	}

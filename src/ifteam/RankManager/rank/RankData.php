@@ -21,8 +21,8 @@ class RankData {
 		$this->data = (new Config ( $this->dataFolder . $this->userName . ".yml", Config::YAML, [ 
 				"nowPrefix" => "",
 				"nowSpecialPrefix" => "",
-				"havePrefixList" => [ ],
-				"haveSpecialPrefixList" => [ ] 
+				"prefixList" => [ ],
+				"specialPrefixList" => [ ] 
 		] ))->getAll ();
 	}
 	public function save($async = false) {
@@ -30,27 +30,42 @@ class RankData {
 	}
 	public function addPrefixs(array $prefixs) {
 		foreach ( $prefixs as $prefix )
-			$this->data ["havePrefixList"] [$prefix] = true;
+			$this->data ["prefixList"] [$prefix] = true;
 	}
 	public function addSpecialPrefixs(array $prefixs) {
 		foreach ( $prefixs as $prefix )
-			$this->data ["haveSpecialPrefixList"] [$prefix] = true;
+			$this->data ["specialPrefixList"] [$prefix] = true;
 	}
 	public function deletePrefixs(array $prefixs) {
 		foreach ( $prefixs as $prefix )
-			if (isset ( $this->data ["havePrefixList"] [$prefix] ))
-				unset ( $this->data ["havePrefixList"] [$prefix] );
+			if (isset ( $this->data ["prefixList"] [$prefix] ))
+				unset ( $this->data ["prefixList"] [$prefix] );
 	}
 	public function deleteSpecialPrefixs(array $prefixs) {
 		foreach ( $prefixs as $prefix )
-			if (isset ( $this->data ["havePrefixList"] [$prefix] ))
-				unset ( $this->data ["havePrefixList"] [$prefix] );
+			if (isset ( $this->data ["prefixList"] [$prefix] ))
+				unset ( $this->data ["prefixList"] [$prefix] );
+	}
+	public function isExistPrefix($prefix) {
+		return isset ( $this->data ["prefixList"] [$prefix] ) ? true : false;
 	}
 	public function setPrefix($prefix) {
 		$this->data ["nowPrefix"] = $prefix;
 	}
 	public function setSpecialPrefix($prefix) {
 		$this->data ["nowSpecialPrefix"] = $prefix;
+	}
+	public function getPrefix() {
+		return $this->data ["nowPrefix"];
+	}
+	public function getSpecialPrefix() {
+		return $this->data ["nowSpecialPrefix"];
+	}
+	public function getPrefixList() {
+		return $this->data ["prefixList"];
+	}
+	public function getSpecialPrefixList() {
+		return $this->data ["specialPrefixList"];
 	}
 }
 
