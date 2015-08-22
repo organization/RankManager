@@ -14,6 +14,8 @@ use ifteam\RankManager\rank\RankLoader;
 use ifteam\RankManager\listener\EventListener;
 use ifteam\RankManager\listener\other\ListenerLoader;
 use ifteam\RankManager\rank\RankProvider;
+use ifteam\RankManager\task\AutoSaveTask;
+use pocketmine\command\PluginCommand;
 
 class RankManager extends PluginBase implements Listener {
 	/**
@@ -66,6 +68,9 @@ class RankManager extends PluginBase implements Listener {
 		$this->eventListener = new EventListener ( $this );
 		
 		$this->getServer ()->getPluginManager ()->registerEvents ( $this, $this );
+		$this->getServer ()->getScheduler ()->scheduleRepeatingTask ( new AutoSaveTask ( $this ), 12000 );
+		
+		$this->registerCommand ( $this->get ( "rank" ), "rankmanager.rank.manage", $this->get ( "rank-description" ), "/" . $this->get ( "rank" ) );
 	}
 	public function onDisable() {
 		$this->save ();
@@ -106,6 +111,14 @@ class RankManager extends PluginBase implements Listener {
 			$this->saveResource ( $targetYmlName, true );
 		}
 	}
+	public function registerCommand($name, $permission, $description = "", $usage = "") {
+		$commandMap = $this->getServer ()->getCommandMap ();
+		$command = new PluginCommand ( $name, $this );
+		$command->setDescription ( $description );
+		$command->setPermission ( $permission );
+		$command->setUsage ( $usage );
+		$commandMap->register ( $name, $command );
+	}
 	private function initMessage() {
 		$this->saveResource ( "messages.yml", false );
 		$this->messagesUpdate ( "messages.yml" );
@@ -133,7 +146,7 @@ class RankManager extends PluginBase implements Listener {
 		return static::$instance;
 	}
 	public function onCommand(CommandSender $player, Command $command, $label, Array $args) {
-		$this->eventListener->onCommand ( $player, $command, $label, $args );
+		return $this->eventListener->onCommand ( $player, $command, $label, $args );
 	}
 }
 

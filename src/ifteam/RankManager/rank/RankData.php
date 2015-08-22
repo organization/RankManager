@@ -15,10 +15,13 @@ class RankData {
 		$this->userName = $userName;
 		$this->dataFolder = $dataFolder . substr ( $userName, 0, 1 ) . "/";
 		
+		if (! file_exists ( $this->dataFolder ))
+			@mkdir ( $this->dataFolder );
+		
 		$this->load ();
 	}
 	public function load() {
-		$this->data = (new Config ( $this->dataFolder . $this->userName . ".yml", Config::YAML, [ 
+		$this->data = (new Config ( $this->dataFolder . $this->userName . ".json", Config::JSON, [ 
 				"nowPrefix" => "",
 				"nowSpecialPrefix" => "",
 				"prefixList" => [ ],
@@ -26,7 +29,7 @@ class RankData {
 		] ))->getAll ();
 	}
 	public function save($async = false) {
-		(new Config ( $this->dataFolder . $this->userName . ".yml", $this->data ))->save ( $async );
+		(new Config ( $this->dataFolder . $this->userName . ".json", Config::JSON, $this->data ))->save ( $async );
 	}
 	public function addPrefixs(array $prefixs) {
 		foreach ( $prefixs as $prefix )

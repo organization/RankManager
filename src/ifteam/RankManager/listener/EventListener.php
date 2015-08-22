@@ -16,6 +16,8 @@ use ifteam\RankManager\rank\RankLoader;
 use ifteam\RankManager\RankManager;
 use ifteam\RankManager\rank\RankProvider;
 use ifteam\RankManager\listener\other\ListenerLoader;
+use pocketmine\utils\TextFormat;
+use pocketmine\event\player\PlayerChatEvent;
 
 class EventListener implements Listener {
 	/**
@@ -47,13 +49,24 @@ class EventListener implements Listener {
 		$plugin->getServer ()->getPluginManager ()->registerEvents ( $this, $plugin );
 	}
 	public function onPlayerJoinEvent(PlayerJoinEvent $event) {
-		$this->loader->loadRank ( $event->getPlayer ()->getName () );
+		if ($this->provider->getDefaultPrefix () != null) {
+			$rankData = $this->loader->getRank ( $event->getPlayer () );
+			
+			$rankData->addPrefixs ( [ 
+					$this->provider->getDefaultPrefix () 
+			] );
+			if ($rankData->getPrefix () == null)
+				$rankData->setPrefix ( $this->provider->getDefaultPrefix () );
+		}
 	}
 	public function onPlayerQuitEvent(PlayerQuitEvent $event) {
 		$this->loader->unloadRank ( $event->getPlayer ()->getName () );
 	}
 	public function onPlayerKickEvent(PlayerKickEvent $event) {
 		$this->loader->unloadRank ( $event->getPlayer ()->getName () );
+	}
+	public function onPlayerChatEvent(PlayerChatEvent $event) {
+		$event->setFormat ( $this->provider->applyChatFormat ( $event->getPlayer ()->getName (), TextFormat::WHITE . $event->getMessage () ) );
 	}
 	public function onSignChangeEvent(SignChangeEvent $event) {
 		if (! $event->getPlayer ()->hasPermission ( "rankmanager.rankshop.create" ))
@@ -91,54 +104,156 @@ class EventListener implements Listener {
 		$z = $event->getBlock ()->getZ ();
 		$rankShop = $this->provider->getRankShop ( $levelName, $x, $y, $z );
 		
-		if ($rankShop === null)
-			return;
-		
-		$event->setCancelled ();
-		
-		if (! $event->getPlayer ()->hasPermission ( "rankmanager.rankshop.use" )) {
-			$this->plugin->alert ( $event->getPlayer (), $this->plugin->get ( "rankshop-you-cant-buy-rank" ) );
-			return;
+		if ($rankShop !== null) {
+			$event->setCancelled ();
+			
+			if (! $event->getPlayer ()->hasPermission ( "rankmanager.rankshop.use" )) {
+				$this->plugin->alert ( $event->getPlayer (), $this->plugin->get ( "rankshop-you-cant-buy-rank" ) );
+				return;
+			}
+			
+			$economyAPI = $this->listenerLoader->getEconomyAPI ();
+			if ($economyAPI === null) {
+				$this->plugin->alert ( $event->getPlayer (), $this->plugin->get ( "there-are-no-economyapi" ) );
+				return;
+			}
+			
+			$myMoney = $economyAPI->myMoney ( $event->getPlayer () );
+			if ($rankShop ["price"] > $myMoney) {
+				$this->plugin->message ( $event->getPlayer (), $this->plugin->get ( "rankshop-not-enough-money" ) );
+				return;
+			}
+			
+			$rankData = $this->loader->getRank ( $event->getPlayer () );
+			if ($rankData->isExistPrefix ( $rankShop ["prefix"] )) {
+				$this->plugin->alert ( $event->getPlayer (), $this->plugin->get ( "already-buy-that-prefix" ) );
+				$this->plugin->alert ( $event->getPlayer (), $this->plugin->get ( "you-can-change-prefix" ) );
+				return;
+			}
+			
+			$economyAPI->reduceMoney ( $event->getPlayer (), $rankShop ["price"] );
+			$rankData->addPrefixs ( [ 
+					$rankShop ["prefix"] 
+			] );
+			$rankData->setPrefix ( $rankShop ["prefix"] );
+			$this->plugin->message ( $player, $this->plugin->get ( "prefix-buy-success" ) );
 		}
-		
-		$economyAPI = $this->listenerLoader->getEconomyAPI ();
-		if ($economyAPI === null) {
-			$this->plugin->alert ( $event->getPlayer (), $this->plugin->get ( "there-are-no-economyapi" ) );
-			return;
-		}
-		
-		$myMoney = $economyAPI->myMoney ( $event->getPlayer () );
-		if ($rankShop ["price"] > $myMoney) {
-			$this->plugin->message ( $event->getPlayer (), $this->plugin->get ( "rankshop-not-enough-money" ) );
-			return;
-		}
-		
-		$rankData = $this->loader->getRank ( $event->getPlayer () );
-		if ($rankData->isExistPrefix ( $rankShop ["prefix"] )) {
-			// TODO 이미구매한 칭호입니다 ! 구매불가능 !
-			// TODO /칭호 설정 칭호명 으로 변경 가능합니다 !
-			return;
-		}
-		
-		$economyAPI->reduceMoney ( $event->getPlayer (), $rankShop ["price"] );
-		$rankData->addPrefixs ( [ 
-				$rankShop ["prefix"] 
-		] );
-		$rankData->setPrefix ( $rankShop ["prefix"] );
-		$this->plugin->message ( $player, $this->plugin->get ( "prefix-buy-success" ) );
 	}
 	public function onCommand(CommandSender $player, Command $command, $label, Array $args) {
 		if (! $player->hasPermission ( "rankmanager.rank.manage" ))
 			return false;
-		if (! is_array ( $args ) or ! isset ( $args [0] )) {
+		if (strtolower ( $command->getName () ) != $this->plugin->get ( "rank" ))
+			return false;
+		
+		if (! isset ( $args [0] )) {
+			$this->plugin->message ( $player, $this->plugin->get ( "rank-help1" ) );
+			$this->plugin->message ( $player, $this->plugin->get ( "rank-help2" ) );
+			$this->plugin->message ( $player, $this->plugin->get ( "rank-help3" ) );
+			$this->plugin->message ( $player, $this->plugin->get ( "rank-help6" ) );
+			if ($player->hasPermission ( "rankmanager.rank.control" )) {
+				$this->plugin->message ( $player, $this->plugin->get ( "rank-help4" ) );
+				$this->plugin->message ( $player, $this->plugin->get ( "rank-help5" ) );
+			}
+			return true;
 		}
-		// TODO 칭호 목록 - 본인이 보유하고 있는 칭호목록을 표시합니다.
-		// TODO 칭호 설정 <칭호명> - 해당칭호로 칭호를 변경합니다.
-		// TODO 칭호 삭제 <칭호명> - 해당 칭호를 삭제합니다.
-		// ----------------------------------------------
-		// TODO 칭호 추가 <유저명> <칭호명> - 해당유저에게 해당칭호를 줍니다.
-		// TODO 칭호 삭제 <유저명> <칭호명> - 해당유저에게서 해당 칭호를 삭제합니다.
-		// TODO 칭호 확인 <유저명> - 해당유저의 칭호를 확인합니다.
+		
+		switch ($args [0]) {
+			case $this->plugin->get ( "list" ) :
+				$rankData = $this->loader->getRank ( $player );
+				
+				$string = TextFormat::DARK_AQUA;
+				foreach ( $rankData->getPrefixList () as $prefix => $bool )
+					$string .= "<{$prefix}> ";
+				$this->plugin->message ( $player, $this->plugin->get ( "show-the-self-prefix-list" ) );
+				$this->plugin->message ( $player, $string );
+				break;
+			case $this->plugin->get ( "set" ) :
+				if (! isset ( $args [1] )) {
+					$this->plugin->message ( $player, $this->plugin->get ( "rank-help2" ) );
+					return true;
+				}
+				$rankData = $this->loader->getRank ( $player );
+				if (! $rankData->isExistPrefix ( $args [1] )) {
+					$this->plugin->alert ( $player, $this->plugin->get ( "not-exist-that-prefix" ) );
+					return true;
+				}
+				$rankData->setPrefix ( $args [1] );
+				$this->provider->applyNameTag ( $player->getName () );
+				$this->plugin->message ( $player, $this->plugin->get ( "prefix-changed" ) );
+				break;
+			case $this->plugin->get ( "add" ) :
+				if (! $player->hasPermission ( "rankmanager.rank.control" ))
+					return false;
+				if (! isset ( $args [1] )) {
+					$this->plugin->message ( $player, $this->plugin->get ( "rank-help4" ) );
+					return true;
+				}
+				if (! isset ( $args [2] )) {
+					$rankData = $this->loader->getRank ( $player );
+					if ($rankData->isExistPrefix ( $args [1] )) {
+						$this->plugin->alert ( $player, $this->plugin->get ( "already-exist-that-prefix" ) );
+						return true;
+					}
+					$rankData->addPrefixs ( [ 
+							$args [1] 
+					] );
+					$this->plugin->message ( $player, $this->plugin->get ( "prefix-added" ) );
+				} else {
+					$rankData = $this->loader->getRankToName ( $args [1] );
+					if ($rankData->isExistPrefix ( $args [2] )) {
+						$this->plugin->alert ( $player, $this->plugin->get ( "already-exist-that-prefix" ) );
+						return true;
+					}
+					$rankData->addPrefixs ( [ 
+							$args [2] 
+					] );
+					$this->plugin->message ( $player, $this->plugin->get ( "prefix-added" ) );
+				}
+				break;
+			case $this->plugin->get ( "del" ) :
+				if (! isset ( $args [1] )) {
+					$this->plugin->message ( $player, $this->plugin->get ( "rank-help3" ) );
+					return true;
+				}
+				if (! isset ( $args [2] )) {
+					$rankData = $this->loader->getRank ( $player );
+					if (! $rankData->isExistPrefix ( $args [1] )) {
+						$this->plugin->alert ( $player, $this->plugin->get ( "not-exist-that-prefix" ) );
+						return true;
+					}
+					$rankData->deletePrefixs ( [ 
+							$args [1] 
+					] );
+					$this->plugin->message ( $player, $this->plugin->get ( "prefix-deleted" ) );
+				} else {
+					if (! $player->hasPermission ( "rankmanager.rank.control" ))
+						return false;
+					$rankData = $this->loader->getRankToName ( $args [1] );
+					if (! $rankData->isExistPrefix ( $args [2] )) {
+						$this->plugin->alert ( $player, $this->plugin->get ( "not-exist-that-prefix" ) );
+						return true;
+					}
+					$rankData->deletePrefixs ( [ 
+							$args [2] 
+					] );
+					$this->plugin->message ( $player, $this->plugin->get ( "prefix-deleted" ) );
+				}
+				break;
+			case $this->plugin->get ( "check" ) :
+				if (! isset ( $args [1] )) {
+					$this->plugin->message ( $player, $this->plugin->get ( "rank-help6" ) );
+					return true;
+				}
+				$rankData = $this->loader->getRankToName ( $args [1] );
+				
+				$string = TextFormat::DARK_AQUA;
+				foreach ( $rankData->getPrefixList () as $prefix => $bool )
+					$string .= "<{$prefix}> ";
+				$this->plugin->message ( $player, $this->plugin->get ( "show-the-user-prefix-list" ) );
+				$this->plugin->message ( $player, $string );
+				break;
+		}
+		return true;
 	}
 }
 ?>
