@@ -38,8 +38,6 @@ class RankLoader {
 	 * Create a default setting
 	 *
 	 * @param string $userName        	
-	 * @param string $nowPrefix        	
-	 * @param array $havePrefixList        	
 	 */
 	public function loadRank($userName) {
 		$userName = strtolower ( $userName );
@@ -66,7 +64,7 @@ class RankLoader {
 		$userName = strtolower ( $userName );
 		if (! isset ( $this->users [$userName] ))
 			return false;
-		if ($this->users [$userName] instanceof RankData){
+		if ($this->users [$userName] instanceof RankData) {
 			$this->users [$userName]->save ( true );
 		}
 		unset ( $this->users [$userName] );

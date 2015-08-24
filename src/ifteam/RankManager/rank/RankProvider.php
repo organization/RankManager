@@ -93,8 +93,8 @@ class RankProvider {
 		$prefix = $this->loader->getRankToName ( $name )->getPrefix ();
 		($prefix == null) ? $prefix = "" : $prefix = $this->applyPrefixFormat ( $prefix ) . " ";
 		
-		$string = str_replace ( "%prefix%", $prefix, $this->db ["defaultPrefixFormat"] );
-		$string = str_replace ( "%name%", TextFormat::WHITE . $name, $this->db ["defaultPrefixFormat"] );
+		$string = str_replace ( "%prefix%", $prefix, $string );
+		$string = str_replace ( "%name%", TextFormat::WHITE . $name, $string );
 		return $string;
 	}
 	public function applyNameTag($name) {
