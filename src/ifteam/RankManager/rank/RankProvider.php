@@ -10,7 +10,7 @@ use pocketmine\Player;
 
 class RankProvider {
 	/**
-	 * 
+	 *
 	 * @var RankProvider
 	 */
 	private static $instance = null;
@@ -134,6 +134,23 @@ class RankProvider {
 			return false;
 		unset ( $this->db ["rankShop"] ["{$levelName}:{$x}:{$y}:{$z}"] );
 		return true;
+	}
+	/**
+	 * Create a default setting
+	 *
+	 * @param string $userName        	
+	 */
+	public function loadRank($userName) {
+		return $this->loader->loadRank ( $userName );
+	}
+	public function unloadRank($userName = null) {
+		return $this->loader->unloadRank ( $userName );
+	}
+	public function getRank(Player $player) {
+		return $this->loader->getRank ( $player );
+	}
+	public function getRankToName($name) {
+		return $this->loader->getRankToName ( $name );
 	}
 	public static function getInstance() {
 		return static::$instance;
