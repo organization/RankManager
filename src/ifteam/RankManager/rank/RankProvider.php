@@ -10,6 +10,11 @@ use pocketmine\Player;
 
 class RankProvider {
 	/**
+	 * 
+	 * @var RankProvider
+	 */
+	private static $instance = null;
+	/**
 	 *
 	 * @var RankManager
 	 */
@@ -30,6 +35,9 @@ class RankProvider {
 	 */
 	private $db;
 	public function __construct(RankManager $plugin) {
+		if (self::$instance == null)
+			self::$instance = $this;
+		
 		$this->plugin = $plugin;
 		$this->loader = $plugin->getRankLoader ();
 		$this->server = Server::getInstance ();
@@ -126,6 +134,9 @@ class RankProvider {
 			return false;
 		unset ( $this->db ["rankShop"] ["{$levelName}:{$x}:{$y}:{$z}"] );
 		return true;
+	}
+	public static function getInstance() {
+		return static::$instance;
 	}
 }
 

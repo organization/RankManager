@@ -179,13 +179,6 @@ class EventListener implements Listener {
 			case $this->plugin->get ( "list" ) :
 				isset ( $args [1] ) ? $index = $args [1] : $index = 1;
 				$this->getPrefixList ( $player, $index );
-				// $rankData = $this->loader->getRank ( $player );
-				
-				// $string = TextFormat::DARK_AQUA;
-				// foreach ( $rankData->getPrefixList () as $prefix => $bool )
-				// $string .= "<{$prefix}> ";
-				// $this->plugin->message ( $player, $this->plugin->get ( "show-the-self-prefix-list" ) );
-				// $this->plugin->message ( $player, $string );
 				break;
 			case $this->plugin->get ( "set" ) :
 				if (! isset ( $args [1] )) {
