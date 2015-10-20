@@ -3,7 +3,6 @@
 namespace ifteam\RankManager\rank;
 
 use pocketmine\Player;
-use pocketmine\utils\Config;
 use pocketmine\Server;
 use ifteam\RankManager\RankManager;
 use ifteam\RankManager\task\AutoUnloadTask;

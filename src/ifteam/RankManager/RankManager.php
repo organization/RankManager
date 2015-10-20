@@ -4,9 +4,7 @@ namespace ifteam\RankManager;
 
 use pocketmine\plugin\PluginBase;
 use pocketmine\event\Listener;
-use pocketmine\IPlayer;
 use pocketmine\utils\Config;
-use pocketmine\Player;
 use pocketmine\utils\TextFormat;
 use pocketmine\command\CommandSender;
 use pocketmine\command\Command;

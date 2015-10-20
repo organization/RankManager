@@ -24,11 +24,12 @@ class RankData {
 	public function load() {
 		$this->data = (new Config ( $this->dataFolder . $this->userName . ".json", Config::JSON, [ 
 				"nowPrefix" => null,
-				"prefixList" => [ ] 
-		] ))->getAll ();
+				"prefixList" => [ ] ] ))->getAll ();
 	}
 	public function save($async = false) {
-		(new Config ( $this->dataFolder . $this->userName . ".json", Config::JSON, $this->data ))->save ( $async );
+		$data = new Config ( $this->dataFolder . $this->userName . ".json", Config::JSON );
+		$data->setAll ( $this->data );
+		$data->save ( $async );
 	}
 	public function addPrefixs(array $prefixs) {
 		foreach ( $prefixs as $prefix )
