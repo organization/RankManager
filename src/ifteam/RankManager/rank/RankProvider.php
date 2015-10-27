@@ -51,7 +51,9 @@ class RankProvider {
 		] ))->getAll ();
 	}
 	public function save($async = false) {
-		(new Config ( $this->plugin->getDataFolder () . "pluginDB.yml", Config::YAML, $this->db ))->save ( $async );
+		$config = new Config ( $this->plugin->getDataFolder () . "pluginDB.yml", Config::YAML );
+		$config->setAll ( $this->db );
+		$config->save ( $async );
 	}
 	public function setDefaultPrefix($prefix) {
 		$this->db ["defaultPrefix"] = $prefix;
