@@ -84,7 +84,7 @@ class RankLoader {
 	/**
 	 * Get Rank Data
 	 *
-	 * @param string $player        	
+	 * @param string $name        	
 	 * @return RankData
 	 */
 	public function getRankToName($name) {
