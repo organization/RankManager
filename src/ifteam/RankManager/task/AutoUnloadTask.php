@@ -10,7 +10,7 @@ class AutoUnloadTask extends Task {
 	public function __construct(RankLoader $owner) {
 		$this->owner = $owner;
 	}
-	public function onRun($currentTick) {
+	public function onRun(int $currentTick) {
 		$this->owner->unloadRank ();
 	}
 }

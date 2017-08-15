@@ -10,7 +10,7 @@ class AutoSaveTask extends PluginTask {
 	public function __construct(Plugin $owner) {
 		parent::__construct ( $owner );
 	}
-	public function onRun($currentTick) {
+	public function onRun(int $currentTick) {
 		$this->getOwner ()->save ( true );
 	}
 }
