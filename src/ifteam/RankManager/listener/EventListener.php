@@ -157,7 +157,7 @@ class EventListener implements Listener {
 		$this->plugin->message ( $event->getPlayer (), $this->plugin->get ( "prefix-buy-success" ) );
 		$this->plugin->message ( $event->getPlayer (), $this->plugin->get ( "you-can-use-rank-set" ) );
 	}
-	public function onCommand(CommandSender $player, Command $command, $label, Array $args) {
+	public function onCommand(CommandSender $player, Command $command, $label, Array $args) : bool {
 		if (! $player->hasPermission ( "rankmanager.rank.manage" ))
 			return false;
 		if (strtolower ( $command->getName () ) != $this->plugin->get ( "rank" ))

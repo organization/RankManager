@@ -143,7 +143,7 @@ class RankManager extends PluginBase implements Listener {
 	public static function getInstance() {
 		return static::$instance;
 	}
-	public function onCommand(CommandSender $player, Command $command, $label, Array $args) {
+	public function onCommand(CommandSender $player, Command $command,string $label, Array $args) : bool {
 		return $this->eventListener->onCommand ( $player, $command, $label, $args );
 	}
 }
