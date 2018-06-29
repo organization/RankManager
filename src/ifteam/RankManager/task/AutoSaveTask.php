@@ -2,16 +2,17 @@
 //
 namespace ifteam\RankManager\task;
 
-use pocketmine\scheduler\PluginTask;
+use pocketmine\scheduler\Task;
 use pocketmine\plugin\Plugin;
 
-class AutoSaveTask extends PluginTask {
+class AutoSaveTask extends Task {
 	protected $owner;
+	
 	public function __construct(Plugin $owner) {
-		parent::__construct ( $owner );
+		$this->owner = $owner;
 	}
 	public function onRun(int $currentTick) {
-		$this->getOwner ()->save ( true );
+		$this->owner->save ( true );
 	}
 }
 ?>

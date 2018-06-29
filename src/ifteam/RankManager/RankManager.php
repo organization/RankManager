@@ -18,12 +18,12 @@ use pocketmine\command\PluginCommand;
 class RankManager extends PluginBase implements Listener {
 	/**
 	 *
-	 * @var Message file
+	 * @desc Message file
 	 */
 	private $messages;
 	/**
 	 *
-	 * @var Message file version
+	 * @desc Message file version
 	 */
 	private $m_version = 1;
 	/**
@@ -66,7 +66,7 @@ class RankManager extends PluginBase implements Listener {
 		$this->eventListener = new EventListener ( $this );
 		
 		$this->getServer ()->getPluginManager ()->registerEvents ( $this, $this );
-		$this->getServer ()->getScheduler ()->scheduleRepeatingTask ( new AutoSaveTask ( $this ), 12000 );
+		$this->getScheduler ()->scheduleRepeatingTask ( new AutoSaveTask ( $this ), 12000 );
 		
 		$this->registerCommand ( $this->get ( "rank" ), "rankmanager.rank.manage", $this->get ( "rank-description" ), "/" . $this->get ( "rank" ) );
 	}
@@ -89,7 +89,7 @@ class RankManager extends PluginBase implements Listener {
 	}
 	/**
 	 *
-	 * @return \ifteam\RankManager\EventListener
+	 * @return \ifteam\RankManager\listener\EventListener
 	 */
 	public function getEventListener() {
 		return $this->eventListener;

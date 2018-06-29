@@ -11,7 +11,7 @@ class RankLoader {
 	private static $instance = null;
 	/**
 	 *
-	 * @var Users prefix data
+	 * @desc Users prefix data
 	 */
 	private $users = [ ];
 	/**
@@ -31,7 +31,7 @@ class RankLoader {
 		$this->server = Server::getInstance ();
 		$this->plugin = $plugin;
 		
-		$this->server->getScheduler ()->scheduleRepeatingTask ( new AutoUnloadTask ( $this ), 12000 );
+		$this->plugin->getScheduler ()->scheduleRepeatingTask ( new AutoUnloadTask ( $this ), 12000 );
 	}
 	/**
 	 * Create a default setting
@@ -100,7 +100,7 @@ class RankLoader {
 	}
 	/**
 	 *
-	 * @return AreaLoader
+	 * @return RankLoader
 	 */
 	public static function getInstance() {
 		return static::$instance;

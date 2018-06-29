@@ -2,7 +2,6 @@
 
 namespace ifteam\RankManager\listener\other;
 
-use ifteam\RankManager\listener\other\EconomyAPIListener;
 use pocketmine\event\Listener;
 use pocketmine\plugin\Plugin;
 
